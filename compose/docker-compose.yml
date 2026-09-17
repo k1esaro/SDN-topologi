@@ -1,0 +1,25 @@
+services:
+  onos:
+    image: onosproject/onos:2.7-latest
+    container_name: onos
+    restart: unless-stopped
+    environment:
+      # Приложения активируются при старте: onos-service кладёт маркер active
+      # в apps/org.onosproject.<имя>/ до запуска Karaf. Руками в CLI не лезем.
+      # На этапе 4 отсюда надо будет убрать fwd, иначе он воскреснет при перезапуске.
+      ONOS_APPS: drivers,openflow,fwd,gui2
+    ports:
+      - "6653:6653"    # OpenFlow, домен 1
+      - "8181:8181"    # Web GUI и REST, onos/rocks
+      - "8101:8101"    # Karaf CLI по SSH, karaf/karaf
+
+  faucet:
+    image: faucet/faucet:1.10.12
+    container_name: faucet
+    restart: unless-stopped
+    ports:
+      - "6654:6653"    # OpenFlow домена 2: снаружи 6654, внутри 6653
+      - "9302:9302"    # метрики Prometheus, этап 6
+    volumes:
+      - ./faucet:/etc/faucet              # конфиг правится на хосте, Faucet перечитывает сам
+      - ../data/faucet-log:/var/log/faucet
