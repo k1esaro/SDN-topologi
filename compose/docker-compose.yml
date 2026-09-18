@@ -17,6 +17,11 @@ services:
     image: faucet/faucet:1.10.12
     container_name: faucet
     restart: unless-stopped
+    environment:
+      # По умолчанию Faucet перечитывает конфиг только по SIGHUP. Здесь включаем
+      # слежение за mtime файла: правка faucet.yaml на хосте применяется сама.
+      # Это и есть «сеть узнала о мероприятии = подмена конфига» из контекста.
+      FAUCET_CONFIG_STAT_RELOAD: "1"
     ports:
       - "6654:6653"    # OpenFlow домена 2: снаружи 6654, внутри 6653
       - "9302:9302"    # метрики Prometheus, этап 6

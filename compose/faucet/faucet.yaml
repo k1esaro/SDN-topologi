@@ -1,0 +1,80 @@
+# Домен 2 (место проведения мероприятия), контроллер Faucet.
+# ВАЖНО: dp_id здесь обязан совпасть с dpid коммутатора в topo/city_event.py,
+#        а номера интерфейсов — с порядком портов, который задаётся в addLink(..., port1=, port2=).
+# Схема домена: s7 — пограничный, к нему звездой три зоны доступа s8, s9, s10.
+# Петель нет, поэтому хватает одного VLAN без stacking.
+
+vlans:
+  event:
+    vid: 100
+    description: "сеть места проведения"
+
+dps:
+  s7:
+    dp_id: 0x7
+    description: "пограничный коммутатор домена 2, стык с доменом 1"
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "to-domain1"
+        description: "стык s6 (ONOS) <-> s7 (Faucet) — узкое место этапа 2"
+        native_vlan: event
+      2:
+        name: "to-s8"
+        description: "зона видеонаблюдения"
+        native_vlan: event
+      3:
+        name: "to-s9"
+        description: "зона участников"
+        native_vlan: event
+      4:
+        name: "to-s10"
+        description: "зона служб на месте"
+        native_vlan: event
+
+  s8:
+    dp_id: 0x8
+    description: "зона доступа: камеры на объекте"
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "to-s7"
+        native_vlan: event
+      2:
+        name: "h_cam"
+        description: "камеры видеонаблюдения, критичный класс (полоса)"
+        native_vlan: event
+
+  s9:
+    dp_id: 0x9
+    description: "зона доступа: точки доступа участников"
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "to-s7"
+        native_vlan: event
+      2:
+        name: "h_ap1"
+        description: "участники, best-effort"
+        native_vlan: event
+      3:
+        name: "h_ap2"
+        description: "участники, best-effort"
+        native_vlan: event
+      4:
+        name: "h_ap3"
+        description: "участники, best-effort"
+        native_vlan: event
+
+  s10:
+    dp_id: 0xa
+    description: "зона доступа: терминалы служб на месте"
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "to-s7"
+        native_vlan: event
+      2:
+        name: "h_term"
+        description: "терминалы служб на месте, критичный класс (задержка)"
+        native_vlan: event
